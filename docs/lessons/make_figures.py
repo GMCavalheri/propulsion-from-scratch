@@ -6,6 +6,9 @@ Run with ``uv run python docs/lessons/make_figures.py``. Validation figures live
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
@@ -32,6 +35,9 @@ from propulsion.units import FT
 
 CRUISE = FlightCondition.at_altitude(11000.0, 0.8, geopotential=True)
 FL350 = FlightCondition.at_altitude(35000 * FT, 0.78, geopotential=True)
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "validation"))
+from engines import calibrated_engine  # noqa: E402
 
 OUT = P.FIGURES / "lessons"
 
@@ -438,6 +444,71 @@ def l4_fan_pressure_ratio():
     return save(fig, "l4_fan_pressure_ratio.png")
 
 
+def l5_operating_lines():
+    """Fan and HPC operating lines in corrected coordinates at three flight conditions."""
+    e = calibrated_engine("CFM56-7B26/3")
+    conditions = [
+        ("sea-level static", FlightCondition.sea_level_static()),
+        ("5 km, Mach 0.5", FlightCondition.at_altitude(5000.0, 0.5)),
+        ("FL350, Mach 0.78", FL350),
+    ]
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.2))
+    for i, (label, fc) in enumerate(conditions):
+        Tt4 = np.linspace(1.12, 0.55, 40) * e.design_point.Tt4 * fc.Tt0() / 288.15
+        guess, pts = None, []
+        for t in Tt4:
+            p = e.operate(fc, t, guess=guess)
+            if not p.converged:
+                break
+            pts.append(p)
+            guess = p
+        st = [p.cycle.stations for p in pts]
+        fan_flow = [p.corrected_flow for p in pts]
+        core_flow = [
+            p.mdot_core * np.sqrt(float(s["25"].T) / 288.15) / (float(s["25"].P) / 101325.0)
+            for p, s in zip(pts, st, strict=True)
+        ]
+        c = P.SERIES[i]
+        axes[0].plot(
+            fan_flow,
+            [p.pi_f for p in pts],
+            color=c,
+            label=label,
+            lw=2.6 if i == 0 else 1.6,
+            ls="-" if i != 1 else "--",
+        )
+        axes[1].plot(
+            core_flow,
+            [p.pi_cH for p in pts],
+            color=c,
+            label=label,
+            lw=2.6 if i == 0 else 1.6,
+            ls="-" if i != 1 else "--",
+        )
+    d = e.design_point
+    s = d.cycle.stations
+    axes[0].plot(d.corrected_flow, d.pi_f, "o", color=P.REFERENCE, label="take-off rating")
+    core_d = d.mdot_core * np.sqrt(float(s["25"].T) / 288.15) / (float(s["25"].P) / 101325.0)
+    axes[1].plot(core_d, d.pi_cH, "o", color=P.REFERENCE, label="take-off rating")
+    axes[0].set_xlabel("corrected fan flow ṁ₀√θ₂/δ₂ [kg/s]")
+    axes[0].set_ylabel("fan pressure ratio πf")
+    axes[0].set_title("Fan operating line")
+    axes[0].legend()
+    axes[1].set_xlabel("corrected HPC flow ṁc√θ₂₅/δ₂₅ [kg/s]")
+    axes[1].set_ylabel("HPC pressure ratio πcH")
+    axes[1].set_title("HPC operating line")
+    fig.suptitle(
+        "CFM56-7B26/3 model: the choked HP turbine pins the HPC to one line; the fan line "
+        "depends on flight Mach once its nozzle unchokes",
+        fontsize=10,
+        x=0.02,
+        ha="left",
+        weight="bold",
+        y=1.02,
+    )
+    return save(fig, "l5_operating_lines.png")
+
+
 FIGURES = [
     l1_atmosphere,
     l1_compressible_flow,
@@ -450,6 +521,7 @@ FIGURES = [
     l3_pressure_ratio_sweep,
     l4_bypass_sweep,
     l4_fan_pressure_ratio,
+    l5_operating_lines,
 ]
 
 if __name__ == "__main__":
