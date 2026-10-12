@@ -20,8 +20,11 @@ Plan: `AERO-03-propulsion-from-scratch-PLAN.md` (tick the phase checkboxes as ph
   `brayton_cycle`, `component_models`, `turbofan_model`, `off_design_performance`,
   `trade_studies`; `plotting.py` shared.
 - `tests/` — pytest, one file per module. `validation/` — scripts + cited reference data.
-- `docs/` — theory note per module, validation report, figures; `docs/lessons/` is the lesson
-  course, one lesson per phase (keep its numbers in sync with the code). `notebooks/` — demos.
+- `docs/` — theory note per module, validation report, flight-parameters guide, figures;
+  `docs/lessons/` is a seven-lesson course (keep its numbers in sync with the code: rerun the
+  snippets and the scripts that produced them after any model change). `notebooks/` — demos.
+- `validation/engines.py` — calibrated CFM56-7B26/3 and LEAP-1B28 models (one calibration each:
+  Tt4 to the ICAO take-off fuel flow); `validation/reference_data/` — cited ICAO and TCDS data.
 
 ## Conventions
 - **SI units internally** (K, Pa, kg/s, N, J/kg). Helpers that take or return other units say so
@@ -52,5 +55,7 @@ Plan: `AERO-03-propulsion-from-scratch-PLAN.md` (tick the phase checkboxes as ph
 - No employer references in the repo; name engine families and aircraft only.
 
 ## Workflow
-- Commit small logical changes directly to `main`, push after `ruff` + `pytest` pass.
+- Commit small logical changes directly to `main`, push after
+  `uv run ruff check . && uv run ruff format --check . && uv run pytest` pass (no pipes: a pipe
+  hides the exit code). Stage explicit paths rather than `git add -A`.
 - Each phase lands as code + tests, then its lesson in `docs/lessons/` as a separate commit.
