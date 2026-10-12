@@ -27,9 +27,11 @@ from propulsion.gas import (
     mass_flow_parameter,
     stagnation_pressure_ratio,
 )
+from propulsion.turbofan_model import optimum_fan_pressure_ratio, turbofan
 from propulsion.units import FT
 
 CRUISE = FlightCondition.at_altitude(11000.0, 0.8, geopotential=True)
+FL350 = FlightCondition.at_altitude(35000 * FT, 0.78, geopotential=True)
 
 OUT = P.FIGURES / "lessons"
 
@@ -340,6 +342,102 @@ def l3_pressure_ratio_sweep():
     return save(fig, "l3_pressure_ratio_sweep.png")
 
 
+def _best_fan(alpha, pi_c=32.0, Tt4=1500.0, flight=None, components=None):
+    """Turbofan at the fan pressure ratio of minimum TSFC (searched), booster 1.6."""
+    flight = flight or FL350
+    components = components or Components.modern()
+    pi_f = np.geomspace(1.1, 12.0, 4000)
+    p = turbofan(flight, alpha, pi_f, pi_c, Tt4, pi_cL=1.6, components=components)
+    i = np.nanargmin(p.tsfc)
+    return pi_f[i], turbofan(flight, alpha, pi_f[i], pi_c, Tt4, pi_cL=1.6, components=components)
+
+
+def l4_bypass_sweep():
+    alpha = np.linspace(0.0, 14.0, 141)
+    fig, axes = plt.subplots(1, 3, figsize=(13, 4.2))
+    m = Components.modern()
+    for i, pi_f in enumerate((1.5, 1.7, 2.0, 2.5)):
+        p = turbofan(FL350, alpha, pi_f, 32.0, 1500.0, pi_cL=1.6, components=m)
+        axes[0].plot(alpha, p.tsfc * 1e6, color=P.SERIES[i], label=f"πf = {pi_f}")
+        axes[1].plot(alpha, p.specific_thrust, color=P.SERIES[i])
+    best = [_best_fan(a)[1] for a in alpha]
+    tsfc = np.array([float(b.tsfc) for b in best])
+    axes[0].plot(alpha, tsfc * 1e6, color=P.REFERENCE, ls="--", lw=1.4, label="best πf")
+    axes[1].plot(
+        alpha, [float(b.specific_thrust) for b in best], color=P.REFERENCE, ls="--", lw=1.4
+    )
+    axes[2].plot(alpha, [float(b.eta_thermal) for b in best], label="thermal ηT")
+    axes[2].plot(alpha, [float(b.eta_propulsive) for b in best], label="propulsive ηP")
+    axes[2].plot(alpha, [float(b.eta_overall) for b in best], color=P.REFERENCE, label="overall ηO")
+    axes[0].set_ylim(15, 35)
+    axes[0].set_ylabel("TSFC [mg/(N·s)]")
+    axes[0].set_title("Fuel consumption")
+    axes[0].legend()
+    axes[1].set_ylim(0, 900)
+    axes[1].set_ylabel("specific thrust F/ṁ₀ [N·s/kg]")
+    axes[1].set_title("Specific thrust")
+    axes[2].set_ylim(0, 1)
+    axes[2].set_title("Efficiencies at the best πf")
+    axes[2].legend()
+    for ax in axes:
+        ax.set_xlabel("bypass ratio α")
+    fig.suptitle(
+        "Turbofan at FL350, Mach 0.78: OPR 32, Tt4 = 1500 K, modern components",
+        x=0.02,
+        ha="left",
+        weight="bold",
+        y=1.02,
+    )
+    return save(fig, "l4_bypass_sweep.png")
+
+
+def l4_fan_pressure_ratio():
+    pi_f = np.linspace(1.15, 3.5, 800)
+    m = Components.modern()
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.2))
+    for i, alpha in enumerate((4.0, 6.0, 8.0, 10.0, 12.0)):
+        p = turbofan(FL350, alpha, pi_f, 32.0, 1500.0, pi_cL=1.6, components=m)
+        axes[0].plot(pi_f, p.tsfc * 1e6, color=P.SERIES[i], label=f"α = {alpha:.0f}")
+        j = np.nanargmin(p.tsfc)
+        axes[0].plot(pi_f[j], p.tsfc[j] * 1e6, "o", color=P.SERIES[i], ms=5)
+    axes[0].set_ylim(16, 26)
+    axes[0].set_xlabel("fan pressure ratio πf")
+    axes[0].set_ylabel("TSFC [mg/(N·s)]")
+    axes[0].set_title("Each bypass ratio has a best fan (●)")
+    axes[0].legend(ncols=2)
+    ax = axes[1]
+    alpha = 8.0
+    real = turbofan(FL350, alpha, pi_f, 32.0, 1500.0, pi_cL=1.6, components=m)
+    ideal = turbofan(
+        FL350, alpha, pi_f, 32.0, 1500.0, components=Components(), hot=AIR, include_fuel_mass=False
+    )
+    ax.plot(pi_f, real.V9, color=P.SERIES[1], label="core jet V9")
+    ax.plot(pi_f, real.extras["V19"], color=P.SERIES[0], label="fan jet V19")
+    ax.plot(pi_f, ideal.V9, color=P.SERIES[1], ls="--", lw=1.2, label="V9, ideal")
+    ax.plot(pi_f, ideal.extras["V19"], color=P.SERIES[0], ls="--", lw=1.2, label="V19, ideal")
+    j = np.nanargmin(real.tsfc)
+    ax.axvline(pi_f[j], color=P.SERIES[1], lw=0.8, ls=":")
+    pf_ideal = optimum_fan_pressure_ratio(FL350, alpha, 32.0, 1500.0)
+    ax.axvline(pf_ideal, color=P.TEXT_MUTED, lw=0.8, ls=":")
+    ax.text(pf_ideal + 0.05, 120, "ideal optimum:\nV9 = V19", fontsize=8, color=P.TEXT_MUTED)
+    ax.text(
+        pi_f[j] - 0.03,
+        120,
+        "real optimum:\nV19 ≈ 0.8 V9",
+        fontsize=8,
+        ha="right",
+        color=P.SERIES[1],
+    )
+    ax.axhline(FL350.V0(), color=P.REFERENCE, lw=0.8)
+    ax.text(3.45, FL350.V0() + 12, "flight speed V0", fontsize=8, ha="right")
+    ax.set_xlabel("fan pressure ratio πf")
+    ax.set_ylabel("jet velocity [m/s]")
+    ax.set_title("Jet velocities at α = 8")
+    ax.set_ylim(0, 900)
+    ax.legend(loc="upper right")
+    return save(fig, "l4_fan_pressure_ratio.png")
+
+
 FIGURES = [
     l1_atmosphere,
     l1_compressible_flow,
@@ -350,6 +448,8 @@ FIGURES = [
     l3_loss_steps,
     l3_ts_ideal_vs_real,
     l3_pressure_ratio_sweep,
+    l4_bypass_sweep,
+    l4_fan_pressure_ratio,
 ]
 
 if __name__ == "__main__":
