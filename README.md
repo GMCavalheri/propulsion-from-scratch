@@ -68,16 +68,26 @@ from propulsion.units import FT
 fl350 = FlightCondition.at_altitude(35000 * FT, 0.78, geopotential=True)  # flight level
 
 # Cycle design: a 5.5-bypass turbofan at cruise
-p = turbofan(fl350, alpha=5.5, pi_f=1.7, pi_c=32.0, Tt4=1450.0, pi_cL=1.6,
-             components=Components.modern())
+p = turbofan(
+    fl350, alpha=5.5, pi_f=1.7, pi_c=32.0, Tt4=1450.0, pi_cL=1.6, components=Components.modern()
+)
 print(f"{p.specific_thrust:.1f} N s/kg, TSFC {p.tsfc * 1e6:.2f} mg/(N s)")  # 193.8, 18.99
 
 # Off-design: size an engine at sea-level static, then fly it
-engine = TurbofanEngine.design(FlightCondition.sea_level_static(), alpha=5.1, pi_f=1.8,
-                               pi_c=27.7, Tt4=1420.0, pi_cL=1.6, thrust=117e3)
+engine = TurbofanEngine.design(
+    FlightCondition.sea_level_static(),
+    alpha=5.1,
+    pi_f=1.8,
+    pi_c=27.7,
+    Tt4=1420.0,
+    pi_cL=1.6,
+    thrust=117e3,
+)
 cruise = engine.operate_at_thrust(fl350, 22e3)
-print(f"cruise: Tt4 {cruise.Tt4:.0f} K, N1 {100 * cruise.N1:.1f} %, "
-      f"N2 {100 * cruise.N2:.1f} %, fuel {cruise.fuel_flow * 3600:.0f} kg/h")
+print(
+    f"cruise: Tt4 {cruise.Tt4:.0f} K, N1 {100 * cruise.N1:.1f} %, "
+    f"N2 {100 * cruise.N2:.1f} %, fuel {cruise.fuel_flow * 3600:.0f} kg/h"
+)
 ```
 
 Calibrated models of the real engines are in [`validation/engines.py`](validation/engines.py):
