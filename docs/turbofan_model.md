@@ -11,8 +11,9 @@ Stations (SAE ARP755): 0 → 2 inlet → fan → 13; bypass 13 → 19 (fan nozzl
 LPT drives the fan and the booster.
 
 Inputs: bypass ratio α = $\dot m_{bypass}/\dot m_{core}$, fan pressure ratio $\pi_f$, overall
-pressure ratio $\pi_c = P_{t3}/P_{t2}$, booster ratio $\pi_{cL}$ (HPC ratio
-$\pi_c/(\pi_f\pi_{cL})$), $T_{t4}$, components, gases, nozzle kinds.
+pressure ratio $\pi_c = P_{t3}/P_{t2}$, booster ratio $\pi_{cL}$, burner exit temperature
+$T_{t4}$, components, gases and nozzle kinds. The HPC ratio follows as
+$\pi_{cH} = \pi_c/(\pi_f\pi_{cL})$.
 
 ## Balances (per unit core flow)
 
