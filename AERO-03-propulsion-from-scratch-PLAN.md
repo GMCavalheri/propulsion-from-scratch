@@ -50,7 +50,7 @@ propulsion-from-scratch/
 - [x] **Phase 2 — Component-level modeling**: add component efficiencies (compressor/turbine polytropic efficiency, combustor pressure loss), compare ideal vs. real cycle performance.
 - [x] **Phase 3 — Turbofan extension**: implement the two-spool turbofan model with bypass ratio parameter, validate specific thrust/TSFC trends against published turbofan design charts.
 - [x] **Phase 4 — Off-design performance**: model altitude/Mach/throttle effects on thrust and fuel flow, compare general trends against publicly available CFM56/LEAP-1B performance summaries.
-- [ ] **Phase 5 — Parametric trade studies**: sweep bypass ratio and pressure ratio, reproduce the classical trend toward high-bypass turbofans for fuel efficiency.
+- [x] **Phase 5 — Parametric trade studies**: sweep bypass ratio and pressure ratio, reproduce the classical trend toward high-bypass turbofans for fuel efficiency.
 - [ ] **Phase 6 — Documentation and publishing**: cycle diagrams, performance maps, and a written explanation connecting each model parameter to observable flight parameters (EGT, N1/N2, fuel flow).
 
 ## Validation Strategy

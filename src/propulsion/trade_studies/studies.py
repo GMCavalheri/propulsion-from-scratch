@@ -80,9 +80,11 @@ def sweep(
     Tt4,
     pi_cL: float = 1.0,
     components: Components = Components.modern(),  # noqa: B008 (frozen dataclass)
+    pi_f_max: float = 4.0,
     **cycle_kwargs,
 ) -> Sweep:
-    """Evaluate every combination of ``alpha`` x ``pi_c`` x ``Tt4``, each with its best fan.
+    """Evaluate every combination of ``alpha`` x ``pi_c`` x ``Tt4``, each with its best fan
+    (searched up to ``pi_f_max``; low bypass ratios need a high cap).
 
     Inputs are broadcast with ``numpy.meshgrid(..., indexing="ij")``; scalars are allowed.
     """
@@ -95,7 +97,7 @@ def sweep(
     kw = {"components": components, **cycle_kwargs}
     PF = np.empty_like(A)
     for idx in np.ndindex(A.shape):
-        PF[idx] = best_fan_pressure_ratio(flight, A[idx], PC[idx], T[idx], pi_cL, **kw)
+        PF[idx] = best_fan_pressure_ratio(flight, A[idx], PC[idx], T[idx], pi_cL, pi_f_max, **kw)
     p = turbofan(flight, A, PF, PC, T, pi_cL=pi_cL, **kw)
     return Sweep(
         alpha=A,
