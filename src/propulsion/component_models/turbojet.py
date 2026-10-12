@@ -1,7 +1,7 @@
 """Parametric (on-design) analysis of the non-ideal single-spool turbojet.
 
 This is the ideal analysis of ``brayton_cycle.ideal_turbojet`` with every idealisation
-removed one by one (Mattingly, *Elements of Propulsion*, 2nd ed., Sec. 7.3):
+removed one by one (Mattingly, *Elements of Propulsion*, 2nd ed., Ch. 7):
 
 - inlet loses total pressure: pi_d = pi_d_max * eta_r(M0)            (``inlet``)
 - compressor and turbine have polytropic efficiencies e_c, e_t        (``turbomachinery``)

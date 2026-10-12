@@ -1,5 +1,5 @@
 """Ideal Brayton cycle and ideal turbojet. Every check is a closed-form identity of the ideal
-cycle (Mattingly, Elements of Propulsion, 2nd ed., Sec. 2.9 and 5.6)."""
+cycle (Mattingly, Elements of Propulsion, 2nd ed., Ch. 2 and 5)."""
 
 import numpy as np
 import pytest

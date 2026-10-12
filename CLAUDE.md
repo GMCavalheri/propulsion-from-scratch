@@ -44,6 +44,7 @@ Plan: `AERO-03-propulsion-from-scratch-PLAN.md` (tick the phase checkboxes as ph
 ## Testing rules
 - Every test asserts against a closed-form result or a cited published value; name the source
   in a comment. Never loosen a tolerance to make a failing model pass without explaining why.
+- Cite textbooks at chapter level unless the section/table number has been checked in the book.
 - Reference data in `validation/reference_data/` must carry its citation (document, issue,
   table). Do not invent data: leave a value out if it cannot be checked against its source.
 - Assumed design inputs (Tt4, component efficiencies, cp/gamma, fuel heating value) are

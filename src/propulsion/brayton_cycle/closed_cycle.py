@@ -8,7 +8,7 @@ tau_lambda = T3 / T1 (turbine inlet over compressor inlet):
     w_net / (cp T1) = tau_lambda (1 - 1/tau) - (tau - 1)  (turbine work - compressor work)
     w_net is maximum at tau* = sqrt(tau_lambda), where T2 = T4.
 
-Reference: Mattingly, *Elements of Propulsion*, 2nd ed., Sec. 2.9 and Ch. 5.
+Reference: Mattingly, *Elements of Propulsion*, 2nd ed., Ch. 2 and 5.
 """
 
 from __future__ import annotations

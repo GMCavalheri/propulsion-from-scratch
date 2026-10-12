@@ -3,7 +3,7 @@
 The polytropic (small-stage) efficiency e is the efficiency of an infinitesimal compression
 or expansion step. It is the same for every stage of a well-designed machine, so it is the
 natural parameter for comparing machines of different pressure ratio (Mattingly 2006,
-Sec. 4.3; Saravanamuttoo et al., *Gas Turbine Theory*, Sec. 2.3). Integrating dT/T =
+Ch. 6; Saravanamuttoo et al., *Gas Turbine Theory*, Ch. 2). Integrating dT/T =
 (g-1)/(g e) dP/P for a compressor and dT/T = e (g-1)/g dP/P for a turbine gives
 
     compressor:  tau_c = pi_c^((g-1)/(g e_c)),   eta_c = (pi_c^((g-1)/g) - 1) / (tau_c - 1)

@@ -7,7 +7,7 @@ import numpy as np
 
 def ram_recovery(M0):
     """Ram recovery eta_r of the military specification MIL-E-5007D, as given by Mattingly
-    (*Elements of Propulsion*, 2nd ed., Sec. 4.2):
+    (*Elements of Propulsion*, 2nd ed., Ch. 6):
 
         eta_r = 1                                for M0 <= 1
         eta_r = 1 - 0.075 (M0 - 1)^1.35          for 1 < M0 <= 5

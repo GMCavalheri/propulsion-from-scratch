@@ -9,7 +9,7 @@ Layout and station numbers (SAE ARP755 / Mattingly):
 The low-pressure spool carries the fan and the booster and is driven by the LPT; the
 high-pressure spool carries the HPC and is driven by the HPT. With bypass ratio
 alpha = mdot_bypass / mdot_core, per unit *core* air flow (Mattingly, *Elements of Propulsion*,
-2nd ed., Sec. 7.4, extended with a booster):
+2nd ed., Ch. 7, extended with a booster):
 
     HP spool:  eta_mH (1 + f) cpt (Tt4 - Tt45) = cpc (Tt3 - Tt25)
     LP spool:  eta_mL (1 + f) cpt (Tt45 - Tt5) = cpc [(1 + alpha)(Tt13 - Tt2) + (Tt25 - Tt13)]

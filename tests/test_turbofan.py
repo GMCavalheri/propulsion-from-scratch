@@ -1,5 +1,5 @@
 """Two-spool separate-exhaust turbofan. Ideal-limit checks use the closed forms of the ideal
-turbofan (Mattingly, Elements of Propulsion, 2nd ed., Sec. 5.9-5.10); the non-ideal model is
+turbofan (Mattingly, Elements of Propulsion, 2nd ed., Ch. 5); the non-ideal model is
 checked through its limits and conservation laws."""
 
 import numpy as np

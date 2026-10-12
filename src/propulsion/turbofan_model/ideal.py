@@ -1,6 +1,6 @@
 """Closed-form results for the *ideal* separate-exhaust turbofan (one perfect gas, isentropic
 components, f << 1, both nozzles fully expanded), after Mattingly, *Elements of Propulsion*,
-2nd ed., Sec. 5.9-5.10. Here tau_c is the temperature ratio of the *whole* core compression
+2nd ed., Ch. 5. Here tau_c is the temperature ratio of the *whole* core compression
 (fan + compressors) and tau_lambda = Tt4 / T0.
 
     (V9/a0)^2  = 2/(g-1) [tau_lambda - tau_r (tau_c - 1 + alpha (tau_f - 1))

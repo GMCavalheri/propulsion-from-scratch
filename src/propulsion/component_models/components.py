@@ -7,7 +7,7 @@ from dataclasses import dataclass, replace
 
 @dataclass(frozen=True)
 class Components:
-    """Figures of merit of each component (Mattingly, *Elements of Propulsion*, Ch. 4 and 7).
+    """Figures of merit of each component (Mattingly, *Elements of Propulsion*, Ch. 6 and 7).
 
     The defaults describe *ideal* components, so ``Components()`` reproduces the ideal cycle.
 
@@ -35,7 +35,7 @@ class Components:
     def modern(cls) -> Components:
         """Representative values for a modern subsonic turbofan.
 
-        These are **assumptions**, chosen inside the ranges Mattingly (2006, Table 4.4) gives for
+        These are **assumptions**, chosen inside the ranges Mattingly (2006, Ch. 6) tabulates for
         current technology; they are not data for any particular engine.
         """
         return cls(

@@ -38,7 +38,7 @@ Each idealisation of Lesson 2 becomes one parameter:
 | Gas | one perfect gas, $f \ll 1$ | $c_{pt}$, $\gamma_t$ after the burner; $(1+f)$ kept | hot, partly burnt gas | 1239 J/(kg·K), 1.30 |
 
 The numbers in the last column are **assumptions**. They sit inside the ranges Mattingly
-(*Elements of Propulsion*, Table 4.4) gives for current technology, but they do not describe any
+(*Elements of Propulsion*, Ch. 6) tabulates for current technology, but they do not describe any
 particular engine. `Components()`, with no arguments, is the ideal engine. The test suite checks
 that it reproduces Lesson 2 to round-off.
 
@@ -302,7 +302,7 @@ off for `Components()`.
 
 ## Further reading
 
-- J. D. Mattingly, *Elements of Propulsion*, 2nd ed., Ch. 4 (component performance) and Ch. 7
+- J. D. Mattingly, *Elements of Propulsion*, 2nd ed., Ch. 6 (component performance) and Ch. 7
   (non-ideal cycle analysis).
-- H. I. H. Saravanamuttoo et al., *Gas Turbine Theory*, Sec. 2.2–2.3 (polytropic efficiency).
+- H. I. H. Saravanamuttoo et al., *Gas Turbine Theory*, Ch. 2 (polytropic efficiency).
 - P. Hill & C. Peterson, *Mechanics and Thermodynamics of Propulsion*, Ch. 5.

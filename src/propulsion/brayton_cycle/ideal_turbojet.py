@@ -1,6 +1,6 @@
 """Parametric (on-design) analysis of the ideal turbojet.
 
-Assumptions (Mattingly, *Elements of Propulsion*, 2nd ed., Sec. 5.6): every component is
+Assumptions (Mattingly, *Elements of Propulsion*, 2nd ed., Ch. 5): every component is
 isentropic except the burner, which adds heat at constant stagnation pressure; one calorically
 perfect gas throughout; the nozzle expands fully to ambient pressure (P9 = P0); the fuel mass
 is small compared with the air mass (f << 1 is neglected in the momentum and energy balances,
@@ -93,7 +93,7 @@ def ideal_turbojet(
 def optimum_compressor_pressure_ratio(flight: FlightCondition, Tt4, gas: Gas = AIR):
     """Compressor pressure ratio of maximum specific thrust: tau_c* = sqrt(tau_lambda) / tau_r.
 
-    Found by setting d(V9/a0)^2 / d(tau_c) = 0 (Mattingly 2006, Sec. 5.6). At this point the
+    Found by setting d(V9/a0)^2 / d(tau_c) = 0 (Mattingly 2006, Ch. 5). At this point the
     static nozzle-exit temperature equals the compressor-exit temperature, T9 = Tt3, the open-
     cycle analogue of T2 = T4 at the work optimum of the closed Brayton cycle.
     """

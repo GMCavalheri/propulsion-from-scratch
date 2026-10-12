@@ -309,7 +309,7 @@ against anyone's numbers. They check the *identities* of the ideal cycle, which 
 
 ## Further reading
 
-- J. D. Mattingly, *Elements of Propulsion*, 2nd ed., Ch. 2 (Brayton cycle), Ch. 4 (thrust) and
-  Ch. 5 (ideal cycle analysis).
+- J. D. Mattingly, *Elements of Propulsion*, 2nd ed., Ch. 2 (Brayton cycle) and Ch. 5 (ideal cycle
+  analysis).
 - P. Hill & C. Peterson, *Mechanics and Thermodynamics of Propulsion*, Ch. 5.
 - H. I. H. Saravanamuttoo et al., *Gas Turbine Theory*, Ch. 2–3.

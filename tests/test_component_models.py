@@ -1,5 +1,5 @@
 """Component models and the non-ideal turbojet (Mattingly, Elements of Propulsion, 2nd ed.,
-Ch. 4 and 7). Checks are closed-form limits, conservation laws and textbook identities."""
+Ch. 6 and 7). Checks are closed-form limits, conservation laws and textbook identities."""
 
 import numpy as np
 import pytest
@@ -147,7 +147,7 @@ def test_losses_cost_thrust_and_fuel():
 
 def test_real_tsfc_has_a_minimum_in_pressure_ratio():
     # with losses, compressor work grows faster than the cycle gains: TSFC is minimum at a
-    # finite pi_c, beyond the specific-thrust optimum (Mattingly 2006, Sec. 7.3 trend)
+    # finite pi_c, beyond the specific-thrust optimum (Mattingly 2006, Ch. 7 trend)
     pi_c = np.geomspace(2.0, 400.0, 2000)
     p = turbojet(CRUISE, pi_c, 1600.0, MODERN)
     i_s, i_f = np.nanargmin(p.tsfc), np.nanargmax(p.specific_thrust)
