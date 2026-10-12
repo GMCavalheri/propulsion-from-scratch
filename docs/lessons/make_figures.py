@@ -38,6 +38,7 @@ FL350 = FlightCondition.at_altitude(35000 * FT, 0.78, geopotential=True)
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "validation"))
 from engines import calibrated_engine  # noqa: E402
+from reference import icao  # noqa: E402
 
 OUT = P.FIGURES / "lessons"
 
@@ -509,6 +510,50 @@ def l5_operating_lines():
     return save(fig, "l5_operating_lines.png")
 
 
+def l6_nox():
+    """Take-off NOx (ICAO databank) against the model's compressor-exit temperature."""
+    names = ["CFM56-7B26/3", "CFM56-7B27/3", "LEAP-1B25", "LEAP-1B28"]
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.2))
+    for k, name in enumerate(names):
+        d = icao(name)
+        st = calibrated_engine(name).design_point.cycle.stations
+        Tt3, Pt3 = float(st["3"].T), float(st["3"].P)
+        c = P.SERIES[0] if name.startswith("CFM") else P.SERIES[1]
+        axes[0].plot(d["opr"], Tt3, "o", color=c, ms=7)
+        axes[0].annotate(
+            name,
+            (d["opr"], Tt3),
+            xytext=(6, -10 if k % 2 else 4),
+            textcoords="offset points",
+            fontsize=8,
+        )
+        axes[1].plot(Tt3, d["nox_takeoff"], "o", color=c, ms=7)
+        axes[1].annotate(
+            f"{name}\n({d['combustor']}, Pt3 {Pt3 / 1e6:.1f} MPa)",
+            (Tt3, d["nox_takeoff"]),
+            xytext=(-8, 6),
+            textcoords="offset points",
+            fontsize=8,
+            ha="right",
+        )
+    axes[0].set_xlabel("overall pressure ratio (ICAO)")
+    axes[0].set_ylabel("model compressor-exit temperature Tt3 [K]")
+    axes[0].set_title("Higher OPR, hotter combustor inlet")
+    axes[1].set_yscale("log")
+    axes[1].set_xlabel("model compressor-exit temperature Tt3 [K]")
+    axes[1].set_ylabel("ICAO take-off NOx EI [g/kg fuel]")
+    axes[1].set_title("Hotter, higher-pressure combustors make more NOx")
+    axes[1].set_xlim(760, 950)
+    fig.suptitle(
+        "Take-off, sea-level static ISA: the emissions price of a high pressure ratio",
+        x=0.02,
+        ha="left",
+        weight="bold",
+        y=1.02,
+    )
+    return save(fig, "l6_nox.png")
+
+
 FIGURES = [
     l1_atmosphere,
     l1_compressible_flow,
@@ -522,6 +567,7 @@ FIGURES = [
     l4_bypass_sweep,
     l4_fan_pressure_ratio,
     l5_operating_lines,
+    l6_nox,
 ]
 
 if __name__ == "__main__":
