@@ -49,33 +49,40 @@ class CyclePerformance:
 def ts_diagram(perf: CyclePerformance, order=("0", "2", "3", "4", "5", "9"), points: int = 40):
     """Temperature and entropy along the cycle, for a T-s plot of a scalar design point.
 
-    Compression and expansion are drawn as straight segments between stations (they are lines
-    of constant entropy only in the ideal cycle). Heat addition (3 -> 4) follows the constant-
-    pressure curve, and the open-cycle heat rejection to the atmosphere (9 -> 0) is closed along
-    the ambient isobar.
+    Entropy is accumulated process by process, each step using the gas of its downstream
+    station (cold gas up to station 3, hot gas from the burner on), and is relative to the
+    free stream. Compression and expansion are drawn as straight segments between stations;
+    heat addition (3 -> 4) follows the burner's pressure path, and the open-cycle heat
+    rejection is drawn along the ambient isobar through station 0. For a single-gas cycle that
+    isobar passes exactly through the nozzle exit; with two gases it can miss it slightly,
+    because the two gas models do not share an entropy datum.
 
-    Returns ``(labels, T_stations, s_stations, T_path, s_path)``; entropy is relative to the
-    free stream, using the cold-gas properties for every station (a common plotting convention).
+    Returns ``(labels, T_stations, s_stations, T_path, s_path)``.
     """
     st = perf.stations
-    ref = st["0"]
-    gas = ref.gas
     labels = [k for k in order if k in st]
     T = np.array([float(st[k].T) for k in labels])
-    s = np.array([float(entropy_change(gas, ref.T, ref.P, st[k].T, st[k].P)) for k in labels])
+    Pk = np.array([float(st[k].P) for k in labels])
+    s = np.zeros(len(labels))
+    for i in range(1, len(labels)):
+        gas = st[labels[i]].gas
+        s[i] = s[i - 1] + float(entropy_change(gas, T[i - 1], Pk[i - 1], T[i], Pk[i]))
 
     T_path, s_path = [], []
     for i, (a, b) in enumerate(zip(labels[:-1], labels[1:], strict=True)):
         if (a, b) == ("3", "4"):
             Tp = np.geomspace(T[i], T[i + 1], points)
-            sp = entropy_change(gas, ref.T, ref.P, Tp, float(st["3"].P))
+            frac = np.log(Tp / T[i]) / np.log(T[i + 1] / T[i])
+            Pp = Pk[i] * (Pk[i + 1] / Pk[i]) ** frac
+            sp = s[i] + entropy_change(st[b].gas, T[i], Pk[i], Tp, Pp)
         else:
             Tp = np.linspace(T[i], T[i + 1], points)
             sp = np.linspace(s[i], s[i + 1], points)
         T_path.append(Tp)
         s_path.append(sp)
-    # heat rejection to the atmosphere at P0 (closes the cycle)
+    # heat rejection to the atmosphere along the ambient isobar through station 0
+    ref = st[labels[0]]
     Tp = np.geomspace(T[-1], T[0], points)
     T_path.append(Tp)
-    s_path.append(entropy_change(gas, ref.T, ref.P, Tp, ref.P))
+    s_path.append(entropy_change(ref.gas, ref.T, ref.P, Tp, ref.P))
     return labels, T, s, np.concatenate(T_path), np.concatenate(s_path)

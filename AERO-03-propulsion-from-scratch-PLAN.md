@@ -47,7 +47,7 @@ propulsion-from-scratch/
 
 ## Execution Plan
 - [x] **Phase 1 — Ideal Brayton cycle**: implement and validate thermal efficiency/specific thrust formulas against textbook closed-form results.
-- [ ] **Phase 2 — Component-level modeling**: add component efficiencies (compressor/turbine polytropic efficiency, combustor pressure loss), compare ideal vs. real cycle performance.
+- [x] **Phase 2 — Component-level modeling**: add component efficiencies (compressor/turbine polytropic efficiency, combustor pressure loss), compare ideal vs. real cycle performance.
 - [ ] **Phase 3 — Turbofan extension**: implement the two-spool turbofan model with bypass ratio parameter, validate specific thrust/TSFC trends against published turbofan design charts.
 - [ ] **Phase 4 — Off-design performance**: model altitude/Mach/throttle effects on thrust and fuel flow, compare general trends against publicly available CFM56/LEAP-1B performance summaries.
 - [ ] **Phase 5 — Parametric trade studies**: sweep bypass ratio and pressure ratio, reproduce the classical trend toward high-bypass turbofans for fuel efficiency.
