@@ -6,6 +6,7 @@
 > fuel-saving idea in the history of jet propulsion.*
 
 **Code:** [`src/propulsion/turbofan_model/`](../../src/propulsion/turbofan_model) ·
+**Notebook:** [`04_turbofan.ipynb`](../../notebooks/04_turbofan.ipynb) ·
 **Previous:** [Lesson 3 — Real components](03-real-components.md) ·
 **Next:** [Lesson 5 — Off-design performance](05-off-design.md)
 

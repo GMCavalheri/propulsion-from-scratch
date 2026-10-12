@@ -6,6 +6,7 @@
 
 **Code:** [`src/propulsion/atmosphere/`](../../src/propulsion/atmosphere),
 [`src/propulsion/gas/`](../../src/propulsion/gas) ·
+**Notebook:** [`01_atmosphere_and_gas.ipynb`](../../notebooks/01_atmosphere_and_gas.ipynb) ·
 **Next:** [Lesson 2 — The ideal Brayton cycle](02-ideal-brayton-cycle.md)
 
 ## Learning objectives

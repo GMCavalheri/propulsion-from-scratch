@@ -7,6 +7,7 @@
 
 **Code:** [`src/propulsion/off_design_performance/`](../../src/propulsion/off_design_performance),
 [`validation/engines.py`](../../validation/engines.py) ·
+**Notebook:** [`05_off_design.ipynb`](../../notebooks/05_off_design.ipynb) ·
 **Previous:** [Lesson 4 — The turbofan](04-turbofan.md) ·
 **Next:** [Lesson 6 — Trade studies](06-trade-studies.md)
 

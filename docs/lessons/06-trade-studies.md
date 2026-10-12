@@ -7,6 +7,7 @@
 
 **Code:** [`src/propulsion/trade_studies/`](../../src/propulsion/trade_studies),
 [`validation/trade_studies.py`](../../validation/trade_studies.py) ·
+**Notebook:** [`06_trade_studies.ipynb`](../../notebooks/06_trade_studies.ipynb) ·
 **Previous:** [Lesson 5 — Off-design](05-off-design.md) ·
 **Next:** [Lesson 7 — Verification and validation](07-verification-and-validation.md)
 

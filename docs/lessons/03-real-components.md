@@ -5,6 +5,7 @@
 > come in. The biggest item is not a component at all.*
 
 **Code:** [`src/propulsion/component_models/`](../../src/propulsion/component_models) ·
+**Notebook:** [`03_component_models.ipynb`](../../notebooks/03_component_models.ipynb) ·
 **Previous:** [Lesson 2 — The ideal Brayton cycle](02-ideal-brayton-cycle.md) ·
 **Next:** [Lesson 4 — The turbofan](04-turbofan.md)
 

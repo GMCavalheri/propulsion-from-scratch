@@ -5,6 +5,7 @@
 > that cost? With perfect components, both answers fit on one page.*
 
 **Code:** [`src/propulsion/brayton_cycle/`](../../src/propulsion/brayton_cycle) ·
+**Notebook:** [`02_ideal_brayton_cycle.ipynb`](../../notebooks/02_ideal_brayton_cycle.ipynb) ·
 **Previous:** [Lesson 1 — The air an engine breathes](01-atmosphere-and-compressible-flow.md) ·
 **Next:** [Lesson 3 — Real components](03-real-components.md)
 
