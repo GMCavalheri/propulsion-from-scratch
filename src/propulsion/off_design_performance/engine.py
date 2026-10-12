@@ -315,18 +315,39 @@ class TurbofanEngine:
         self,
         flight: FlightCondition,
         thrust: float,
-        Tt4_bounds: tuple[float, float] | None = None,
+        start: OperatingPoint | None = None,
+        step: float = 0.03,
     ) -> OperatingPoint:
-        """Find the Tt4 (throttle setting) that gives ``thrust`` [N] at ``flight``."""
-        Tt4_d = self.design_point.Tt4
-        lo, hi = Tt4_bounds or (0.45 * Tt4_d, 1.25 * Tt4_d)
-        cache: dict[float, OperatingPoint] = {}
+        """Find the burner exit temperature Tt4 (the throttle) that gives ``thrust`` [N].
+
+        Walks Tt4 from ``start`` (default: the design Tt4 at this flight condition) in relative
+        steps of ``step``, each solve seeded with the previous point, until the target is
+        bracketed; then refines with Brent's method. Raises ``ValueError`` if the target lies
+        outside the range where the model converges.
+        """
+        here = start or self.operate(flight, self.design_point.Tt4)
+        if not here.converged:
+            raise ValueError("no converged starting point at this flight condition")
+        direction = -1.0 if here.thrust > thrust else 1.0
+        cache = {here.Tt4: here}
+        prev = here
+        for _ in range(200):
+            nxt = self.operate(flight, prev.Tt4 * (1.0 + direction * step), guess=prev)
+            if not nxt.converged:
+                raise ValueError(f"thrust {thrust:.0f} N is outside the converged range")
+            cache[nxt.Tt4] = nxt
+            if (nxt.thrust - thrust) * (prev.thrust - thrust) <= 0:
+                break
+            prev = nxt
+        else:
+            raise ValueError("could not bracket the target thrust")
 
         def excess(Tt4):
-            near = min(cache, key=lambda t: abs(t - Tt4)) if cache else None
-            p = self.operate(flight, Tt4, guess=cache[near] if near is not None else None)
+            near = cache[min(cache, key=lambda t: abs(t - Tt4))]
+            p = self.operate(flight, Tt4, guess=near)
             cache[Tt4] = p
             return p.thrust - thrust
 
-        Tt4 = brentq(excess, lo, hi, xtol=1e-6)
+        lo, hi = sorted((prev.Tt4, nxt.Tt4))
+        Tt4 = brentq(excess, lo, hi, xtol=1e-9, rtol=1e-12)
         return self.operate(flight, Tt4, guess=cache[min(cache, key=lambda t: abs(t - Tt4))])
