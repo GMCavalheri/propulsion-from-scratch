@@ -21,9 +21,9 @@ from __future__ import annotations
 
 from functools import cache
 
-import numpy as np
-from scipy.optimize import brentq, minimize_scalar
+from scipy.optimize import brentq
 
+from propulsion import trade_studies
 from propulsion.component_models import Components
 from propulsion.flight import FlightCondition
 from propulsion.off_design_performance import TurbofanEngine
@@ -41,20 +41,8 @@ _KW = {"components": ENGINE_COMPONENTS, "core_nozzle": "convergent", "fan_nozzle
 
 
 def best_fan_pressure_ratio(alpha: float, pi_c: float, Tt4: float) -> float:
-    """Fan pressure ratio of minimum sea-level-static TSFC for this core.
-
-    A grid search first (past the optimum the core runs out of energy and TSFC is undefined),
-    then a bounded refinement around the best grid point.
-    """
-    grid = np.linspace(1.15, min(3.5, pi_c / PI_CL / 1.5), 400)
-    tsfc = turbofan(SLS, alpha, grid, pi_c, Tt4, pi_cL=PI_CL, **_KW).tsfc
-    i = int(np.nanargmin(tsfc))
-    lo, hi = grid[max(i - 1, 0)], grid[min(i + 1, len(grid) - 1)]
-
-    def f(pi_f):
-        return float(turbofan(SLS, alpha, pi_f, pi_c, Tt4, pi_cL=PI_CL, **_KW).tsfc)
-
-    return float(minimize_scalar(f, bounds=(lo, hi), method="bounded", options={"xatol": 1e-8}).x)
+    """Fan pressure ratio of minimum sea-level-static TSFC for this core."""
+    return trade_studies.best_fan_pressure_ratio(SLS, alpha, pi_c, Tt4, pi_cL=PI_CL, **_KW)
 
 
 @cache

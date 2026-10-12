@@ -77,7 +77,11 @@ def turbojet(
     specific_thrust = ex.gross_thrust(m, P0, hot.R) - V0
     specific_thrust = np.where(ok, specific_thrust, np.nan)
 
-    ke = 0.5 * (m * V9**2 - V0**2)  # kinetic-energy gain per unit inlet air flow
+    # Kinetic-energy gain per unit inlet air flow, using the velocity the jet would reach if
+    # fully expanded to P0: an under-expanded jet still holds pressure energy, and counting
+    # only its actual exit velocity would put eta_p above 1.
+    V9_full = np.where(ok, nozzle_exit(Pt5 * c.pi_n, Tt5, P0, hot, "ideal").V9, np.nan)
+    ke = 0.5 * (m * V9_full**2 - V0**2)
     with np.errstate(divide="ignore", invalid="ignore"):
         tsfc = np.where(specific_thrust > 0, f / specific_thrust, np.nan)  # no thrust, no TSFC
         eta_thermal = ke / (f * h_PR)
@@ -109,6 +113,7 @@ def turbojet(
             "eta_c": compressor_isentropic_efficiency(pi_c, cold.gamma, c.e_c),
             "eta_t": turbine_isentropic_efficiency(tau_t, hot.gamma, c.e_t),
             "M9": ex.M9,
+            "V9_full": V9_full,
             "P9": ex.P9,
         },
     )

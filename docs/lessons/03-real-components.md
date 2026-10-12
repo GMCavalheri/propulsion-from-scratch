@@ -167,7 +167,10 @@ turbojet it is large (Exercise 4). `nozzle_exit(..., kind="convergent")` handles
 | thrust | $F/\dot m_0 = (1+f)V_9 - V_0 + (1+f)R_tT_9(1 - P_0/P_9)/V_9$ |
 
 The efficiencies keep their definitions, with the kinetic-energy gain now
-$\frac12[(1+f)V_9^2 - V_0^2]$.
+$\frac12[(1+f)V_9^2 - V_0^2]$. For a convergent nozzle, $V_9$ here is the velocity the jet
+*would* reach if fully expanded to $P_0$. An under-expanded jet still holds pressure energy, and
+Section 6 showed it cannot turn all of it into thrust. Counting that energy keeps ηP below one,
+and puts the under-expansion loss where it belongs, in the propulsive efficiency.
 
 ## 8. The loss bill
 

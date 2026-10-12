@@ -31,7 +31,9 @@ class CyclePerformance:
     ``specific_thrust`` is F / mdot0 [N s/kg = m/s]; ``tsfc`` is fuel flow per unit thrust
     [kg/(N s)]; ``f`` is the fuel/air ratio of the core. Efficiencies follow Mattingly's
     definitions: thermal = power to the jets / fuel power, propulsive = thrust power / power to
-    the jets, overall = thrust power / fuel power.
+    the jets, overall = thrust power / fuel power. "Power to the jets" is the kinetic-energy gain
+    with every jet *fully expanded* to ambient pressure, so that an under-expanded (convergent)
+    nozzle's pressure thrust is not counted as free energy and eta_p stays below 1.
     """
 
     specific_thrust: np.ndarray

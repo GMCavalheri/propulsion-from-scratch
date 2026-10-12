@@ -107,7 +107,10 @@ def turbofan(
     F_core = np.where(ok, F_core, np.nan)
     specific_thrust = F_core + F_fan
 
-    ke = 0.5 * (m * V9**2 + alpha * V19**2 - (1.0 + alpha) * V0**2)  # per unit core flow
+    # kinetic-energy gain per unit core flow, with both jets fully expanded to P0 (see turbojet)
+    V9_full = np.where(ok, nozzle_exit(Pt5 * c.pi_n, Tt5, P0, hot, "ideal").V9, np.nan)
+    V19_full = nozzle_exit(Pt13 * c.pi_fn, Tt13, P0, cold, "ideal").V9
+    ke = 0.5 * (m * V9_full**2 + alpha * V19_full**2 - (1.0 + alpha) * V0**2)
     with np.errstate(divide="ignore", invalid="ignore"):
         tsfc = np.where(specific_thrust > 0, f / ((1.0 + alpha) * specific_thrust), np.nan)
         eta_thermal = ke / (f * h_PR)
@@ -141,6 +144,8 @@ def turbofan(
             "specific_thrust_fan": F_fan,
             "thrust_ratio_fan": F_fan / specific_thrust,
             "V19": V19,
+            "V9_full": V9_full,
+            "V19_full": V19_full,
             "pi_cH": pi_cH,
             "tau_tH": tau_tH,
             "tau_tL": tau_tL,

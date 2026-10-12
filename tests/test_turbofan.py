@@ -125,3 +125,25 @@ def test_convergent_nozzles():
     assert p.specific_thrust < q.specific_thrust
     # but the loss is small for a turbofan (low nozzle pressure ratios)
     assert p.specific_thrust > 0.97 * q.specific_thrust
+
+
+def test_efficiencies_with_under_expanded_nozzles():
+    # Lesson 3: full expansion maximises thrust, so measuring jet power with fully expanded
+    # velocities keeps eta_p below 2/(1 + V_full/V0) < 1, and eta_o = eta_t eta_p still holds.
+    p = turbofan(
+        CRUISE,
+        5.5,
+        1.8,
+        30.0,
+        1300.0,
+        pi_cL=1.6,
+        components=MODERN,
+        core_nozzle="convergent",
+        fan_nozzle="convergent",
+    )
+    assert p.extras["M19"] == pytest.approx(1.0) and p.extras["M9"] == pytest.approx(1.0)
+    assert 0 < p.eta_propulsive < 1
+    assert p.eta_overall == pytest.approx(p.V0 * 6.5 * p.specific_thrust / (p.f * H_PR_JET_A))
+    q = turbofan(CRUISE, 5.5, 1.8, 30.0, 1300.0, pi_cL=1.6, components=MODERN)
+    assert p.eta_thermal == pytest.approx(q.eta_thermal, rel=1e-12)  # same jet energy
+    assert p.eta_propulsive < q.eta_propulsive  # under-expansion wastes some of it

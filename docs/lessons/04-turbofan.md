@@ -94,6 +94,8 @@ The thermal efficiency now counts the kinetic-energy gain of both streams:
 \eta_P = \frac{2(1+\alpha)V_0\,F/\dot m_0}{(1+f)V_9^2 + \alpha V_{19}^2 - (1+\alpha)V_0^2}
 ```
 
+(As in Lesson 3, $V_9$ and $V_{19}$ in these energy terms are the fully expanded jet velocities.)
+
 Keep the core fixed and raise α. The core produces roughly the same useful energy, so ηT barely
 changes. But that energy now accelerates much more air to a much lower speed, so ηP climbs.
 
