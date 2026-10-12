@@ -24,9 +24,9 @@ def _row(name: str, engine: str) -> dict[str, str]:
 def icao(engine: str) -> dict:
     """ICAO Engine Emissions Databank (Issue 32) row, numbers converted to SI floats."""
     r = _row("icao_eedb.csv", engine)
-    out = {k: float(r[k]) for k in r if k not in ("engine", "uid", "source")}
+    out = {k: float(r[k]) for k in r if k not in ("engine", "uid", "combustor", "source")}
     out["rated_thrust"] = out.pop("rated_thrust_kN") * 1e3
-    out.update(engine=r["engine"], uid=r["uid"], source=r["source"])
+    out.update(engine=r["engine"], uid=r["uid"], combustor=r["combustor"], source=r["source"])
     return out
 
 
