@@ -14,6 +14,7 @@ SCRIPTS = [
     "cycle_validation.py",
     "engine_validation.py",
     "trade_studies.py",
+    "degradation_signatures.py",
 ]
 
 if __name__ == "__main__":
