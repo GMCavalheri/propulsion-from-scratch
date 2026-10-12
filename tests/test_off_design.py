@@ -127,3 +127,20 @@ def test_operate_at_thrust(engine):
     assert p.converged
     assert p.thrust == pytest.approx(target, rel=1e-6)
     assert p.Tt4 < engine.design_point.Tt4
+
+
+def test_degraded_turbine_runs_hotter(engine):
+    # Same hardware, turbines 1 point less efficient: to hold take-off thrust the control must
+    # burn more fuel, and the turbine runs hotter (EGT margin erosion). The choked-nozzle
+    # constraint pi_tH / sqrt(tau_tH) = A4/A45 still holds; tau_tH itself moves.
+    worn = engine.with_components(engine.components.with_(e_t=engine.components.e_t - 0.01))
+    F = engine.design_point.thrust
+    new, old = engine.operate_at_thrust(SLS, F), worn.operate_at_thrust(SLS, F)
+    assert old.converged
+    assert old.fuel_flow > new.fuel_flow
+    assert old.Tt45 > new.Tt45 and old.Tt4 > new.Tt4
+    ex = old.cycle.extras
+    assert float(ex["pi_tH"]) / np.sqrt(float(ex["tau_tH"])) == pytest.approx(
+        engine.hpt_capacity_ratio, rel=1e-8
+    )
+    assert float(ex["tau_tH"]) != pytest.approx(engine.tau_tH, rel=1e-6)

@@ -6,8 +6,9 @@ of Phase 3 had free design choices (alpha, pi_f, pi_c...); off design those beco
 by the geometry. Following the method of Mattingly (*Elements of Propulsion*, 2nd ed., Ch. 8):
 
 1. **Choked turbine nozzles.** The HPT and LPT inlet guide vanes run choked, so
-   mdot sqrt(Tt)/Pt is fixed at both. With constant turbine efficiency this fixes the HPT
-   pressure and temperature ratio: tau_tH = tau_tH,design.
+   mdot sqrt(Tt)/Pt is fixed at both, and their ratio fixes pi_tH / sqrt(tau_tH) = A4/A45.
+   With constant turbine efficiency this pins the HPT temperature ratio, tau_tH = design value;
+   with a degraded turbine (``with_components``) tau_tH moves along that same constraint.
 2. **HP spool.** The HPC must absorb exactly the work the HPT supplies at that tau_tH.
 3. **LP spool.** The LPT drives fan and booster; the booster work keeps a fixed proportion to the
    fan work, since both turn at the same speed: (Tt25 - Tt13) / (Tt13 - Tt2) = design value.
@@ -27,7 +28,7 @@ construction. Spool speeds use the constant-work-coefficient estimate
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 from scipy.optimize import brentq, root
@@ -122,6 +123,7 @@ class TurbofanEngine:
     include_fuel_mass: bool
     # frozen geometry and matching constants (from the design point)
     tau_tH: float
+    hpt_capacity_ratio: float  # pi_tH / sqrt(tau_tH) = A4 / A45 (both nozzles choked)
     booster_work_ratio: float
     C4: float  # mdot4 sqrt(Tt4) / Pt4 (choked HPT nozzle)
     A9: float  # core nozzle throat area [m^2]
@@ -188,6 +190,7 @@ class TurbofanEngine:
             h_PR=h_PR,
             include_fuel_mass=include_fuel_mass,
             tau_tH=float(ex["tau_tH"]),
+            hpt_capacity_ratio=float(ex["pi_tH"]) / np.sqrt(float(ex["tau_tH"])),
             booster_work_ratio=(Tt25 - Tt13) / (Tt13 - Tt2),
             C4=C4,
             A9=A9,
@@ -195,6 +198,14 @@ class TurbofanEngine:
             fan_work=cold.cp * (Tt13 - Tt2),
             hpc_work=cold.cp * (Tt3 - Tt25),
         )
+
+    def with_components(self, components: Components) -> TurbofanEngine:
+        """The same hardware (areas, work split) with different component quality, e.g. a
+        deteriorated engine: ``engine.with_components(engine.components.with_(e_t=0.88))``.
+
+        The design point is kept as the reference for spool speeds and as the solver's start.
+        """
+        return replace(self, components=components)
 
     @staticmethod
     def _cycle_kwargs(components, cold, hot, h_PR, include_fuel_mass):
@@ -238,7 +249,7 @@ class TurbofanEngine:
         Tt2, Tt13, Tt25 = (float(st[k].T) for k in ("2", "13", "25"))
         return np.array(
             [
-                float(ex["tau_tH"]) / self.tau_tH - 1.0,
+                float(ex["pi_tH"]) / np.sqrt(float(ex["tau_tH"])) / self.hpt_capacity_ratio - 1.0,
                 (Tt25 - Tt13) / (Tt13 - Tt2) / self.booster_work_ratio - 1.0,
                 np.log(alpha * mdot_core / bypass),
                 np.log(mdot_core * m / core_capacity),
