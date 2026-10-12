@@ -68,12 +68,19 @@ def test_polytropic_is_the_limit_of_stage_stacking():
 
 
 def test_fuel_air_ratio_energy_balance():
-    Tt3, Tt4, eta_b = 700.0, 1600.0, 0.99
+    # enthalpies of air, products and fuel all measured from the heating-value datum 298.15 K
+    Tt3, Tt4, eta_b, Tr = 700.0, 1600.0, 0.99, 298.15
     f = fuel_air_ratio(Tt3, Tt4, AIR, COMBUSTION_GAS, H_PR_JET_A, eta_b)
-    lhs = (1 + f) * COMBUSTION_GAS.cp * Tt4 - AIR.cp * Tt3
+    lhs = (1 + f) * COMBUSTION_GAS.cp * (Tt4 - Tr) - AIR.cp * (Tt3 - Tr)
     assert lhs == pytest.approx(eta_b * H_PR_JET_A * f, rel=1e-12)
+    # Mattingly's form (each gas from 0 K) is the T_ref = 0 special case
+    fm = fuel_air_ratio(Tt3, Tt4, AIR, COMBUSTION_GAS, H_PR_JET_A, eta_b, T_ref=0.0)
+    lhs = (1 + fm) * COMBUSTION_GAS.cp * Tt4 - AIR.cp * Tt3
+    assert lhs == pytest.approx(eta_b * H_PR_JET_A * fm, rel=1e-12)
+    assert fm > f  # it counts an extra (cpt - cpc) T_ref of heat
+    # one gas, no fuel mass: the datum cancels and f = cp (Tt4 - Tt3) / h_PR exactly
     f0 = fuel_air_ratio(Tt3, Tt4, AIR, AIR, H_PR_JET_A, include_fuel_mass=False)
-    assert f0 == pytest.approx(AIR.cp * (Tt4 - Tt3) / H_PR_JET_A)
+    assert f0 == pytest.approx(AIR.cp * (Tt4 - Tt3) / H_PR_JET_A, rel=1e-12)
 
 
 def test_nozzle_kinds():
