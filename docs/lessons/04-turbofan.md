@@ -103,10 +103,10 @@ With the core fixed (OPR 32, $T_{t4}$ = 1500 K, modern components) at FL350, Mac
 
 | | α = 0 (turbojet) | α = 5.5 | α = 12 |
 |---|---|---|---|
-| best TSFC [mg/(N·s)] | 31.6 | 19.5 | 17.4 |
-| specific thrust at that point [N·s/kg] | 868 | 216 | 121 |
+| best TSFC [mg/(N·s)] | 29.5 | 18.2 | 16.2 |
+| specific thrust at that point [N·s/kg] | 865 | 216 | 121 |
 | propulsive efficiency ηP | 0.36 | 0.68 | 0.79 |
-| thermal efficiency ηT | 0.48 | 0.41 | 0.39 |
+| thermal efficiency ηT | 0.51 | 0.44 | 0.42 |
 | share of thrust from the fan | 0 | 78 % | 87 % |
 
 Going from turbojet to α = 12 **cuts fuel consumption by 45 %**. The price is a seven-fold drop
@@ -192,23 +192,23 @@ These are illustrative choices, not the data of any engine.
    $P_{t13}$ = 60.28 kPa.
 2. **Core compression.** Booster: $T_{t25}$ = 337.8 K, 96.45 kPa. HPC: $T_{t3}$ = 738.9 K,
    $P_{t3}$ = 1135 kPa.
-3. **Burner.** f = 0.02586 per kilogram of *core* air. $P_{t4}$ = 1089 kPa.
-4. **HP turbine** (drives the HPC): $T_{t45}$ = 1130.0 K, πtH = 0.297.
-5. **LP turbine** (drives fan and booster): $T_{t5}$ = 856.3 K, πtL = 0.259, $P_{t5}$ = 83.81 kPa.
+3. **Burner.** f = 0.02392 per kilogram of *core* air. $P_{t4}$ = 1089 kPa.
+4. **HP turbine** (drives the HPC): $T_{t45}$ = 1129.4 K, πtH = 0.296.
+5. **LP turbine** (drives fan and booster): $T_{t5}$ = 855.1 K, πtL = 0.258, $P_{t5}$ = 83.28 kPa.
 6. **Jets.**
    - Fan nozzle: pressure ratio 2.50, $V_{19}$ = 367.1 m/s.
-   - Core nozzle: pressure ratio 3.48, $V_9$ = 728.4 m/s.
+   - Core nozzle: pressure ratio 3.46, $V_9$ = 726.3 m/s.
    - The flight speed is $V_0$ = 231.2 m/s.
-7. **Thrust.** $F/\dot m_0$ = 194.3 N·s/kg: 79.4 from the core and 115.0 from the fan (59 %).
-8. **Fuel and efficiencies.** S = 20.47 mg/(N·s) = 0.723 lb/(lbf·h). ηT = 42.4 %, ηP = 62.3 %,
-   ηO = 26.4 %.
+7. **Thrust.** $F/\dot m_0$ = 193.8 N·s/kg: 78.8 from the core and 115.0 from the fan (59 %).
+8. **Fuel and efficiencies.** S = 18.99 mg/(N·s) = 0.670 lb/(lbf·h). ηT = 45.6 %, ηP = 62.4 %,
+   ηO = 28.4 %.
 9. **Engine size.** With $\dot m_0$ = 125 kg/s at cruise (about Lesson 1's fan face), thrust is
-   24.3 kN and fuel flow 0.497 kg/s (1790 kg/h).
+   24.2 kN and fuel flow 0.460 kg/s (1656 kg/h).
 
-For comparison, a turbojet with the same core (OPR 32, 1450 K) gives 830 N·s/kg and
-31.2 mg/(N·s). The fan saves **34 %** of the fuel.
+For comparison, a turbojet with the same core (OPR 32, 1450 K) gives 827 N·s/kg and
+28.97 mg/(N·s). The fan saves **34 %** of the fuel.
 
-This design is not optimal. At α = 5.5 the best fan pressure ratio is 2.14, giving 19.44 mg/(N·s)
+This design is not optimal. At α = 5.5 the best fan pressure ratio is 2.14, giving 18.05 mg/(N·s)
 (−5 %). That point has $V_{19}/V_9$ = 0.82. Real fans are often chosen below the TSFC optimum, for
 fan-tip speed, noise and nozzle weight.
 
@@ -222,9 +222,9 @@ fl350 = FlightCondition.at_altitude(35000 * FT, 0.78, geopotential=True)
 p = turbofan(
     fl350, alpha=5.5, pi_f=1.7, pi_c=32.0, Tt4=1450.0, pi_cL=1.6, components=Components.modern()
 )
-p.specific_thrust, p.tsfc * 1e6  # 194.3 N s/kg, 20.47 mg/(N s)
-p.extras["specific_thrust_core"], p.extras["specific_thrust_fan"]  # 79.4, 115.0
-p.V9, p.extras["V19"]  # 728.4, 367.1 m/s
+p.specific_thrust, p.tsfc * 1e6  # 193.8 N s/kg, 18.99 mg/(N s)
+p.extras["specific_thrust_core"], p.extras["specific_thrust_fan"]  # 78.8, 115.0
+p.V9, p.extras["V19"]  # 726.3, 367.1 m/s
 ```
 
 ## 8. From equations to code
@@ -286,9 +286,9 @@ The tests in [`tests/test_turbofan.py`](../../tests/test_turbofan.py) check:
 4. Ideal transfer: $\tfrac12 dV_9^2 = -\tfrac12\alpha\ dV_{19}^2$, i.e. $V_9 dV_9 = -\alpha V_{19} dV_{19}$.
    Then $dF \propto dV_9 + \alpha dV_{19} = \alpha dV_{19}(1 - V_{19}/V_9)$. This is zero for a
    non-trivial change only if $V_{19} = V_9$. For $V_{19} < V_9$, raising $\pi_f$ helps.
-5. Fan nozzle pressure ratio 2.50 and core 3.48: both above the critical ratio (1.89 and 1.83),
-   so both choke. Thrust falls 1.2 % (192.1 vs 194.3 N·s/kg) and TSFC rises to 20.71 mg/(N·s).
-   The turbojet lost 10.7 %, because its nozzle pressure ratio was 10.
+5. Fan nozzle pressure ratio 2.50 and core 3.46: both above the critical ratio (1.89 and 1.83),
+   so both choke. Thrust falls 1.1 % (191.6 vs 193.8 N·s/kg) and TSFC rises to 19.21 mg/(N·s).
+   The turbojet lost 10.6 %, because its nozzle pressure ratio was 10.
 
 </details>
 
