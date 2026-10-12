@@ -13,8 +13,20 @@ import numpy as np
 from propulsion import plotting as P
 from propulsion.atmosphere import isa
 from propulsion.brayton_cycle import ideal_turbojet, optimum_compressor_pressure_ratio, ts_diagram
+from propulsion.component_models import (
+    Components,
+    compressor_isentropic_efficiency,
+    turbine_isentropic_efficiency,
+    turbojet,
+)
 from propulsion.flight import FlightCondition
-from propulsion.gas import AIR, area_ratio, mass_flow_parameter, stagnation_pressure_ratio
+from propulsion.gas import (
+    AIR,
+    COMBUSTION_GAS,
+    area_ratio,
+    mass_flow_parameter,
+    stagnation_pressure_ratio,
+)
 from propulsion.units import FT
 
 CRUISE = FlightCondition.at_altitude(11000.0, 0.8, geopotential=True)
@@ -191,7 +203,154 @@ def l2_mach_sweep():
     return save(fig, "l2_mach_sweep.png")
 
 
-FIGURES = [l1_atmosphere, l1_compressible_flow, l2_ts_pv, l2_pressure_ratio_sweep, l2_mach_sweep]
+def l3_polytropic():
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.0))
+    pi = np.geomspace(1.01, 50.0, 300)
+    for i, e in enumerate((0.85, 0.90, 0.95)):
+        c = P.SERIES[i]
+        axes[0].plot(
+            pi, compressor_isentropic_efficiency(pi, AIR.gamma, e), color=c, label=f"e = {e:.2f}"
+        )
+        axes[0].axhline(e, color=c, lw=0.8, ls=":")
+        tau_t = np.linspace(0.4, 0.999, 300)
+        pi_t = tau_t ** (COMBUSTION_GAS.gamma / ((COMBUSTION_GAS.gamma - 1) * e))
+        axes[1].plot(
+            1 / pi_t,
+            turbine_isentropic_efficiency(tau_t, COMBUSTION_GAS.gamma, e),
+            color=c,
+            label=f"e = {e:.2f}",
+        )
+        axes[1].axhline(e, color=c, lw=0.8, ls=":")
+    axes[0].set_xscale("log")
+    axes[0].set_xlabel("compressor pressure ratio πc")
+    axes[0].set_ylabel("isentropic efficiency")
+    axes[0].set_title("Compressor: η falls below e")
+    axes[0].legend(loc="lower left")
+    axes[1].set_xscale("log")
+    axes[1].set_xlabel("turbine expansion ratio 1/πt")
+    axes[1].set_title("Turbine: η rises above e (reheat)")
+    axes[1].legend(loc="lower right")
+    for ax in axes:
+        ax.set_ylim(0.7, 1.0)
+        ax.xaxis.set_major_formatter(mticker.FormatStrFormatter("%g"))
+    return save(fig, "l3_polytropic.png")
+
+
+def l3_loss_steps():
+    """Remove the idealisations one at a time (cruise, pi_c = 20, Tt4 = 1600 K)."""
+    m = Components.modern()
+    steps = [
+        ("ideal\n(Lesson 2)", {"components": Components(), "hot": AIR, "include_fuel_mass": False})
+    ]
+    steps.append(("hot-gas\nproperties", {"components": Components(), "include_fuel_mass": False}))
+    c = Components()
+    steps.append(("fuel\nmass", {"components": c}))
+    for name, change in [
+        ("inlet\nπd", {"pi_d_max": m.pi_d_max}),
+        ("compressor\ne_c", {"e_c": m.e_c}),
+        ("burner\nπb, ηb", {"pi_b": m.pi_b, "eta_b": m.eta_b}),
+        ("turbine\ne_t", {"e_t": m.e_t}),
+        ("shaft\nηm", {"eta_m": m.eta_m}),
+        ("nozzle\nπn", {"pi_n": m.pi_n}),
+    ]:
+        c = c.with_(**change)
+        steps.append((name, {"components": c}))
+    perfs = [turbojet(CRUISE, 20.0, 1600.0, **kw) for _, kw in steps]
+    labels = [n for n, _ in steps]
+    x = np.arange(len(steps))
+    fig, axes = plt.subplots(2, 1, figsize=(10, 6.2), sharex=True)
+    for ax, values, unit, color in [
+        (axes[0], [float(p.tsfc) * 1e6 for p in perfs], "TSFC [mg/(N·s)]", P.SERIES[1]),
+        (axes[1], [float(p.specific_thrust) for p in perfs], "F/ṁ₀ [N·s/kg]", P.SERIES[0]),
+    ]:
+        ax.plot(x, values, color=color, marker="o", lw=1.2)
+        ax.plot(x[:1], values[:1], "o", color=P.REFERENCE)
+        for xi, v in zip(x, values, strict=True):
+            ax.annotate(
+                f"{v:.1f}",
+                (xi, v),
+                xytext=(0, 7),
+                textcoords="offset points",
+                ha="center",
+                fontsize=8,
+            )
+        ax.margins(y=0.2)
+        ax.set_ylabel(unit)
+        ax.grid(axis="x", visible=False)
+    axes[1].set_xticks(x, labels, fontsize=8)
+    axes[0].set_title(
+        "Removing the idealisations one at a time (11 km, M 0.8, πc = 20, Tt4 = 1600 K)"
+    )
+    return save(fig, "l3_loss_steps.png")
+
+
+def l3_ts_ideal_vs_real():
+    fig, ax = plt.subplots(figsize=(6.5, 4.5))
+    kw = {"hot": AIR, "include_fuel_mass": False}
+    for perf, label, color in [
+        (turbojet(CRUISE, 20.0, 1600.0, Components(), **kw), "ideal components", P.REFERENCE),
+        (
+            turbojet(CRUISE, 20.0, 1600.0, Components.modern(), **kw),
+            "modern components",
+            P.SERIES[1],
+        ),
+    ]:
+        labels, T, s, Tp, sp = ts_diagram(perf)
+        ax.plot(
+            sp,
+            Tp,
+            color=color,
+            label=label,
+            lw=1.6 if color == P.REFERENCE else 2.0,
+            ls="--" if color == P.REFERENCE else "-",
+        )
+        if color != P.REFERENCE:
+            _annotate_stations(ax, labels[2:], s[2:], T[2:])
+    ax.set_xlabel("entropy s − s₀ [J/(kg·K)]")
+    ax.set_ylabel("temperature [K]")
+    ax.set_title("Losses tilt compression and expansion to the right")
+    ax.legend(loc="upper left")
+    return save(fig, "l3_ts_ideal_vs_real.png")
+
+
+def l3_pressure_ratio_sweep():
+    pi_c = np.geomspace(2.0, 400.0, 600)
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.0))
+    for i, Tt4 in enumerate((1400.0, 1600.0, 1800.0)):
+        c = P.SERIES[i]
+        ideal = turbojet(CRUISE, pi_c, Tt4, Components())
+        real = turbojet(CRUISE, pi_c, Tt4, Components.modern())
+        axes[0].plot(pi_c, ideal.specific_thrust, color=c, ls="--", lw=1.2)
+        axes[0].plot(pi_c, real.specific_thrust, color=c, label=f"Tt4 = {Tt4:.0f} K")
+        axes[1].plot(pi_c, ideal.tsfc * 1e6, color=c, ls="--", lw=1.2)
+        axes[1].plot(pi_c, real.tsfc * 1e6, color=c)
+        j = np.nanargmin(real.tsfc)
+        axes[1].plot(pi_c[j], real.tsfc[j] * 1e6, "o", color=c, ms=5)
+    for ax in axes:
+        ax.set_xscale("log")
+        ax.set_xlabel("compressor pressure ratio πc")
+        ax.xaxis.set_major_formatter(mticker.FormatStrFormatter("%g"))
+    axes[0].set_ylabel("specific thrust F/ṁ₀ [N·s/kg]")
+    axes[0].set_ylim(0, None)
+    axes[0].set_title("Specific thrust (dashed: ideal components)")
+    axes[0].legend()
+    axes[1].set_ylabel("TSFC [mg/(N·s)]")
+    axes[1].set_ylim(20, 50)
+    axes[1].set_title("TSFC (● = minimum with losses)")
+    return save(fig, "l3_pressure_ratio_sweep.png")
+
+
+FIGURES = [
+    l1_atmosphere,
+    l1_compressible_flow,
+    l2_ts_pv,
+    l2_pressure_ratio_sweep,
+    l2_mach_sweep,
+    l3_polytropic,
+    l3_loss_steps,
+    l3_ts_ideal_vs_real,
+    l3_pressure_ratio_sweep,
+]
 
 if __name__ == "__main__":
     P.use_style()
