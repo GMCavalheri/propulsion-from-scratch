@@ -60,7 +60,7 @@ def ideal_turbojet(
     specific_thrust = a0 * (V9_a0 - M0)
     eta_thermal = 1.0 - 1.0 / (tau_r * tau_c)
     with np.errstate(divide="ignore", invalid="ignore"):
-        tsfc = f / specific_thrust
+        tsfc = np.where(specific_thrust > 0, f / specific_thrust, np.nan)  # no thrust, no TSFC
         # static (M0 = 0): no thrust power, so eta_p = 0 even when V9 = 0 too
         eta_propulsive = np.where(M0 > 0, 2.0 * M0 / (V9_a0 + M0), 0.0)
 

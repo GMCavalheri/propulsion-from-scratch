@@ -163,3 +163,12 @@ def test_convergent_nozzle_under_expands():
     q = turbojet(CRUISE, 20.0, 1600.0, MODERN)
     assert p.extras["M9"] == pytest.approx(1.0) and p.extras["P9"] > CRUISE.P0
     assert p.specific_thrust < q.specific_thrust
+
+
+def test_tsfc_undefined_without_thrust():
+    # past the zero-thrust pressure ratio the engine makes drag: TSFC must not go negative
+    pi_c = np.geomspace(2.0, 400.0, 500)
+    p = turbojet(CRUISE, pi_c, 1400.0, MODERN)
+    assert np.any(p.specific_thrust < 0)
+    assert np.all(np.isnan(p.tsfc[p.specific_thrust <= 0]))
+    assert np.all(p.tsfc[p.specific_thrust > 0] > 0)

@@ -79,7 +79,7 @@ def turbojet(
 
     ke = 0.5 * (m * V9**2 - V0**2)  # kinetic-energy gain per unit inlet air flow
     with np.errstate(divide="ignore", invalid="ignore"):
-        tsfc = f / specific_thrust
+        tsfc = np.where(specific_thrust > 0, f / specific_thrust, np.nan)  # no thrust, no TSFC
         eta_thermal = ke / (f * h_PR)
         eta_propulsive = np.where(flight.M0 > 0, V0 * specific_thrust / ke, 0.0)
 
